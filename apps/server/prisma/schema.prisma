@@ -11,34 +11,41 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(uuid())
-  email String  @unique
-  name  String
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  groups Group[]
-  notifications     Notification[]
-  collaborations    Collaboration[]
+
+  groups         Group[]
+  notifications  Notification[]
+  collaborations Collaboration[]
+  AWS_Config     AWS_Config?
+  Subscription   Subscription?
+  Invitation     Invitation[]
 }
 
 model S3_Bucket {
-  id  Int   @id @default(uuid())
-  configId String
-  name String
+  id         String   @id @default(uuid())
+  configId   String
+  name       String
   aws_region String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  aws_config AWS_Config @relation(fields: [configId], references: [id])
 }
 
 model AWS_Config {
-  id  Int   @id @default(uuid())
-  ARN String @unique
-  externalID  String 
-  userId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  user User  @relation(fields: [userId],reference : [id])
+  id         String   @id @default(uuid())
+  ARN        String   @unique
+  externalID String
+  userId     String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user      User        @relation(fields: [userId], references: [id])
+  S3_Bucket S3_Bucket[]
 }
 
 model Subscription {
@@ -49,7 +56,8 @@ model Subscription {
   endsAt     DateTime
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  user       User      @relation(fields: [userId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Verification {
@@ -62,24 +70,26 @@ model Verification {
 }
 
 model Group {
-  id              String          @id @default(uuid())
-  description     String?
-  ownerId         String
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  collaborations  Collaboration[]
-  owner           User            @relation(fields: [ownerId], references: [id])
-  Role            Role[]
+  id          String   @id @default(uuid())
+  description String?
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  collaborations Collaboration[]
+  owner          User            @relation(fields: [ownerId], references: [id])
+  Role           Role[]
 }
 
 model Role {
-  id            String          @id @default(uuid())
-  name          String
-  description   String?
-  permissions   String[]
-  groupId       String
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  permissions String[]
+  groupId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   collaborators Collaboration[]
   invitations   Invitation[]
   group         Group           @relation(fields: [groupId], references: [id])
@@ -89,26 +99,28 @@ model Invitation {
   id        String           @id @default(uuid())
   recipient String
   roleId    String
-  buckets    String[]
+  buckets   String[]
   status    InvitationStatus @default(PENDING)
   senderId  String
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
-  role      Role             @relation(fields: [roleId], references: [id])
-  sender    User             @relation(fields: [senderId], references: [id])
+
+  role   Role @relation(fields: [roleId], references: [id])
+  sender User @relation(fields: [senderId], references: [id])
 }
 
 model Collaboration {
   id        String   @id @default(uuid())
   roleId    String
-  buckets    String[] //stores the Id of buckets
+  buckets   String[] //stores the Id of buckets
   userId    String
   groupId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  group     Group    @relation(fields: [groupId], references: [id])
-  role      Role     @relation(fields: [roleId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+
+  group Group @relation(fields: [groupId], references: [id])
+  role  Role  @relation(fields: [roleId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 
   @@unique([userId, groupId])
 }
@@ -122,5 +134,27 @@ model Notification {
   read      Boolean          @default(false)
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
-  user      User             @relation(fields: [userId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum VerificationType {
+  SIGN_UP
+  SIGN_IN
+}
+
+enum Plan {
+  PRO
+  ENTERPRISE
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum NotificationType {
+  WARNING
+  INFO
 }

@@ -1,5 +1,5 @@
-import multer from "multer";
-import { env } from "./env";
+import multer from 'multer';
+import { env } from '../utils/env';
 
 const storage = multer.memoryStorage();
 
@@ -12,4 +12,4 @@ export const upload = multer({
   },
 });
 
-export const single = (fieldName = "file") => upload.single(fieldName);
+export const single = (fieldName = 'file') => upload.single(fieldName);

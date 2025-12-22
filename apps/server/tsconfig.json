@@ -1,12 +1,22 @@
 {
-  "extends": "../../packages/config/tsconfig/base.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "declaration": true,
+    "emitDeclarationOnly": false,
     "outDir": "./dist",
     "rootDir": "./src",
+    "composite": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "typeRoots": ["./node_modules/@types", "src/@types"],
     "paths": {
       "@server/*": ["./src/*"]
-    }
+    },
+    "plugins": [{ "transform": "typescript-transform-paths" }]
   },
-
-  "include": ["src"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }

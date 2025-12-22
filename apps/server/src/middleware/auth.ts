@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server';
-import { Context, middleware } from '../lib/trpc';
+import { Context, middleware } from '@server/lib/trpc';
 import { db } from '@server/utils/db';
 import { Permission, PermissionResource } from '@server/utils/constants';
 import jwt from 'jsonwebtoken';

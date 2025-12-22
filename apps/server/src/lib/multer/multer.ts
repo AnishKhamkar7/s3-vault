@@ -1,5 +1,5 @@
 import multer from 'multer';
-import { env } from '../utils/env';
+import { env } from '../../utils/env';
 
 const storage = multer.memoryStorage();
 

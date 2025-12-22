@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
+import { MAX } from 'uuid';
 dotenv.config();
 
 const transformString = (val: string | number | undefined) => {
@@ -30,6 +31,7 @@ const EnvSchema = z.object({
   NODEMAILER_PASSWORD: z.string(),
   NODEMAILER_HOST: z.string(),
   NODEMAILER_PORT: z.string(),
+  MAX_FILE_SIZE: z.union([z.string(), z.number()]).optional().transform(transformString),
 });
 
 export const env = EnvSchema.parse(process.env);

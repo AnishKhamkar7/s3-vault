@@ -30,7 +30,8 @@ model S3_Bucket {
   id         String   @id @default(uuid())
   configId   String
   name       String
-  aws_region String
+  region     String
+  status     BucketStatus
   
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -39,10 +40,10 @@ model S3_Bucket {
 }
 
 model AWS_Config {
-  id         String   @id @default(uuid())
-  ARN        String   @unique
-  externalID String
-  userId     String   @unique
+  id          String   @id @default(uuid())
+  roleArn     String   @unique
+  externalId  String
+  userId      String   @unique
   
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -177,4 +178,10 @@ enum InvitationStatus {
 enum NotificationType {
   WARNING
   INFO
+}
+
+enum BucketStatus {
+  ACTIVE
+  DISABLED
+  ACCESS_REVOKED
 }

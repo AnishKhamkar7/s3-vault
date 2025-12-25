@@ -1,9 +1,9 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import type { Context } from './context';
-import { SessionUserType } from '@server/@types/express';
+import { AuthedContext, BaseContext, SessionUserType } from '@server/types';
 import { session } from '@server/utils/session';
 
-const t = initTRPC.context<Context>().create({});
+const t = initTRPC.context<BaseContext>().create({});
 
 export const router = t.router;
 export const publicProcedure = t.procedure;
@@ -15,7 +15,9 @@ export const protectedProcedure: typeof t.procedure = t.procedure.use(async ({ c
     const payload = await session.read(token);
     const user = payload.user as SessionUserType;
 
-    return next({ ctx: { ...ctx, session: { sid: payload.sid, user } } });
+    return next({
+      ctx: { ...ctx, session: { sid: payload.sid, user } } satisfies AuthedContext,
+    });
   } catch (e) {
     if (e === 'Expired')
       throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Session expired - refresh token to continue!' });
@@ -25,4 +27,4 @@ export const protectedProcedure: typeof t.procedure = t.procedure.use(async ({ c
 
 export const middleware = t.middleware;
 
-export type TRPCHandler<O, I = undefined> = (temp: { input: I; ctx: Context }) => Promise<O>;
+export type TRPCHandler<I = undefined, O = void> = (temp: { input: I; ctx: Context }) => Promise<O>;

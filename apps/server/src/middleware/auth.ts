@@ -1,10 +1,10 @@
 import { TRPCError } from '@trpc/server';
-import { Context, middleware } from '@server/lib/trpc';
+import { middleware } from '@server/lib/trpc';
 import jwt from 'jsonwebtoken';
 import { env } from '@server/utils/env';
-import type { SessionUserType } from '@server/types';
+import type { BaseContext } from '@server/types';
 
-export const verifyRefresh = middleware<Context>(({ ctx, next }) => {
+export const verifyRefresh = middleware<BaseContext>(({ ctx, next }) => {
   const token = ctx.req.cookies['Refresh-Token'];
   if (!token) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Refresh token missing' });
   try {

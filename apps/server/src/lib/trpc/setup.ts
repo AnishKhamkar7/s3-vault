@@ -1,5 +1,4 @@
 import { initTRPC, TRPCError } from '@trpc/server';
-import type { Context } from './context';
 import { AuthedContext, BaseContext, SessionUserType } from '@server/types';
 import { session } from '@server/utils/session';
 
@@ -27,4 +26,4 @@ export const protectedProcedure: typeof t.procedure = t.procedure.use(async ({ c
 
 export const middleware = t.middleware;
 
-export type TRPCHandler<I = undefined, O = void> = (temp: { input: I; ctx: Context }) => Promise<O>;
+export type TRPCHandler<I = undefined, O = void> = (temp: { input: I; ctx: BaseContext }) => Promise<O>;

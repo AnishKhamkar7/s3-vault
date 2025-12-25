@@ -2,7 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { Context, middleware } from '@server/lib/trpc';
 import jwt from 'jsonwebtoken';
 import { env } from '@server/utils/env';
-import type { SessionUserType } from '@server/@types/express';
+import type { SessionUserType } from '@server/types';
 
 export const verifyRefresh = middleware<Context>(({ ctx, next }) => {
   const token = ctx.req.cookies['Refresh-Token'];
@@ -14,7 +14,7 @@ export const verifyRefresh = middleware<Context>(({ ctx, next }) => {
     throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid refresh token' });
   }
 });
-  
+
 //Can be used later for permission based access control
 
 // export const validatePermissions = (resource: PermissionResource, permissions: Permission[]) => {

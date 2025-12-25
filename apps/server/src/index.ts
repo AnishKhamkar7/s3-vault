@@ -85,7 +85,7 @@ import { TRPCError } from '@trpc/server';
 import { db } from './utils/db';
 import { COOKIE_CONFIG, session } from './utils/session';
 
-app.use('/api/trpc', createExpressMiddleware({ router, createContext }));
+app.use('/trpc', createExpressMiddleware({ router, createContext }));
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
   const error = new TRPCError({ code: 'NOT_FOUND', message: `Route ${req.originalUrl} not found.` });

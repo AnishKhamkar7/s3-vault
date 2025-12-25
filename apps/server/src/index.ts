@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import { env } from './utils/env';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth2';
-import { createContext } from './lib/trpc';
+import { createContext } from './lib/trpc/context';
 
 const app: Express = express();
 

@@ -5,12 +5,7 @@ export const AddBucketInputSchema = z.object({
   configId: z.string().uuid(),
 });
 
-const AddBucketOutputSchema = z.object({
-  success: z.boolean(),
-});
-
 export type AddBucketInput = z.infer<typeof AddBucketInputSchema>;
-export type AddBucketOutput = z.infer<typeof AddBucketOutputSchema>;
 
 export const S3ConfigInputSchema = z.object({
   accessKeyId: z.string().min(16).max(128),

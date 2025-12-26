@@ -1,4 +1,4 @@
-// This is your Prisma schema file,
+  // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -21,7 +21,7 @@ model User {
   groups         Group[]
   notifications  Notification[]
   collaborations Collaboration[]
-  AWS_Config     AWS_Config?
+  AWS_Config     Aws_Config?
   Subscription   Subscription?
   Invitation     Invitation[]
 }
@@ -36,10 +36,10 @@ model S3_Bucket {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  aws_config AWS_Config @relation(fields: [configId], references: [id])
+  aws_config Aws_Config @relation(fields: [configId], references: [id])
 }
 
-model AWS_Config {
+model Aws_Config {
   id          String   @id @default(uuid())
   roleArn     String   @unique
   externalId  String

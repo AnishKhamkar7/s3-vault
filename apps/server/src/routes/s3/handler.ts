@@ -1,5 +1,5 @@
 import { TRPCHandler } from '@server/lib/trpc';
-import { AddBucketInput, AddBucketOutput, S3ConfigInput } from './types';
+import { AddBucketInput, S3ConfigInput } from './types';
 import { S3Repo } from './repo';
 import { encrypt } from '@server/utils/encryotion';
 import { TRPCError } from '@trpc/server/unstable-core-do-not-import';

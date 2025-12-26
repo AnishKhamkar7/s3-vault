@@ -26,4 +26,4 @@ export const protectedProcedure: typeof t.procedure = t.procedure.use(async ({ c
 
 export const middleware = t.middleware;
 
-export type TRPCHandler<I = undefined, O = void> = (temp: { input: I; ctx: BaseContext }) => Promise<O>;
+export type TRPCHandler<I = undefined> = (temp: { input: I; ctx: BaseContext }) => Promise<unknown>;

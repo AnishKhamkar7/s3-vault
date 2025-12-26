@@ -32,6 +32,7 @@ const EnvSchema = z.object({
   NODEMAILER_HOST: z.string(),
   NODEMAILER_PORT: z.string(),
   MAX_FILE_SIZE: z.union([z.string(), z.number()]).optional().transform(transformString),
+  S3_ENC_KEY: z.string().length(64, 'S3_ENC_KEY must be 32 bytes (hex)'),
 });
 
 export const env = EnvSchema.parse(process.env);

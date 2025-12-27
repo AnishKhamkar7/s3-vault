@@ -8,8 +8,8 @@ export const AddBucketInputSchema = z.object({
 export type AddBucketInput = z.infer<typeof AddBucketInputSchema>;
 
 export const S3ConfigInputSchema = z.object({
-  accessKeyId: z.string().min(16).max(128),
-  secretAccessKey: z.string().min(16).max(128),
+  roleArn: z.string().min(1),
+  externalId: z.string().min(1),
   region: z.string().min(3).max(50),
 });
 

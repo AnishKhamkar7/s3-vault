@@ -43,6 +43,7 @@ model Aws_Config {
   id          String   @id @default(uuid())
   roleArn     String   @unique
   externalId  String
+  region      String
   userId      String   @unique
   
   createdAt  DateTime @default(now())

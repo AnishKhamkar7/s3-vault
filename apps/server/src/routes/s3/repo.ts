@@ -2,15 +2,24 @@ import { db } from '@server/utils/db';
 
 export class S3Repo {
   addConfig({
-    accessKeyId,
-    secretAccessKey,
+    roleArn,
+    externalId,
+    userId,
     region,
   }: {
-    accessKeyId: string;
-    secretAccessKey: string;
+    roleArn: string;
+    externalId: string;
+    userId: string;
     region: string;
   }) {
-    return db.aws_Config.create({ data: { accessKeyId, secretAccessKey, region } });
+    return db.aws_Config.create({ data: { roleArn, externalId, userId, region } });
   }
-  addBucket(input: AddBucketInput) {}
+
+  getConfigById(id: string) {
+    return db.aws_Config.findUnique({ where: { id } });
+  }
+
+  getConfigsByUserId(userId: string) {
+    return db.aws_Config.findMany({ where: { userId } });
+  }
 }

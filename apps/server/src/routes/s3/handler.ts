@@ -4,6 +4,9 @@ import { S3Repo } from './repo';
 import { encrypt } from '@server/utils/encryotion';
 import { TRPCError } from '@trpc/server/unstable-core-do-not-import';
 import requireSession from '@server/utils/requireSession';
+import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
+import { GetBucketLocationCommand, ListBucketsCommand, S3Client } from '@aws-sdk/client-s3';
+import s3 from '.';
 
 export class S3handler {
   private s3Repo: S3Repo;
@@ -13,21 +16,83 @@ export class S3handler {
 
   addS3Config: TRPCHandler<S3ConfigInput> = async ({ input, ctx }) => {
     requireSession(ctx);
-    const { user } = ctx.session;
-    const { roleArn, externalId, region } = input;
-
     try {
+      const { user } = ctx.session;
+      const { roleArn, externalId, region } = input;
+
+      const sts = new STSClient({ region });
+
+      const assumed = await sts.send(
+        new AssumeRoleCommand({
+          RoleArn: roleArn,
+          ExternalId: externalId,
+          RoleSessionName: `s3-verify-${user.id}`,
+        })
+      );
+
+      if (!assumed.Credentials) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Unable to assume role with provided ARN and External ID',
+        });
+      }
+
+      if (
+        !assumed.Credentials.AccessKeyId ||
+        !assumed.Credentials.SecretAccessKey ||
+        !assumed.Credentials.SessionToken
+      ) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Incomplete credentials received from STS',
+        });
+      }
+
+      const { AccessKeyId, SecretAccessKey, SessionToken } = assumed.Credentials;
+
+      const s3Init = new S3Client({
+        region,
+        credentials: {
+          accessKeyId: AccessKeyId,
+          secretAccessKey: SecretAccessKey,
+          sessionToken: SessionToken,
+        },
+      });
+
       const encryptedRoleArn = encrypt(roleArn);
       const encryptedExternalId = encrypt(externalId);
 
-      const result = await this.s3Repo.addConfig({
+      const s3Config = await this.s3Repo.addConfig({
         roleArn: `${encryptedRoleArn.iv}:${encryptedRoleArn.tag}:${encryptedRoleArn.value}`,
         externalId: `${encryptedExternalId.iv}:${encryptedExternalId.tag}:${encryptedExternalId.value}`,
         region,
         userId: user.id,
       });
 
-      //Get
+      const s3Buckets = await s3Init.send(new ListBucketsCommand({}));
+
+      const buckets = s3Buckets.Buckets ?? [];
+
+      for (const bucket of buckets) {
+        if (!bucket.Name) continue;
+
+        let bucketRegion = region;
+        try {
+          const loc = await s3Init.send(new GetBucketLocationCommand({ Bucket: bucket.Name }));
+          bucketRegion = !loc.LocationConstraint ? region : loc.LocationConstraint;
+        } catch (error) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `Unable to get location for bucket ${bucket.Name}`,
+          });
+        }
+
+        await this.s3Repo.addBucket({
+          name: bucket.Name,
+          region: bucketRegion,
+          configId: s3Config.id,
+        });
+      }
     } catch (err) {
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',

@@ -22,4 +22,8 @@ export class S3Repo {
   getConfigsByUserId(userId: string) {
     return db.aws_Config.findMany({ where: { userId } });
   }
+
+  addBucket({ name, region, configId }: { name: string; region: string; configId: string }) {
+    return db.s3_Bucket.create({ data: { name, region, configId, status: 'ACTIVE' } });
+  }
 }

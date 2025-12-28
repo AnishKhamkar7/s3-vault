@@ -7,7 +7,8 @@ const s3Repo = new S3Repo();
 const s3Handler = new S3handler(s3Repo);
 
 const appRouter = trpcRouter({
-  addConfig: protectedProcedure.input(S3ConfigInputSchema).mutation(s3Handler.addS3Config),
+  addConfig: protectedProcedure.input(S3ConfigInputSchema).mutation(s3Handler.addConfig),
+  getBuckets: protectedProcedure.query(s3Handler.getBuckets),
 });
 
 export default appRouter;

@@ -1,12 +1,11 @@
 import { TRPCHandler } from '@server/lib/trpc';
 import { S3ConfigInput } from './types';
 import { S3Repo } from './repo';
-import { encrypt } from '@server/utils/encryotion';
+import { encrypt } from '@server/utils/encryption';
 import { TRPCError } from '@trpc/server/unstable-core-do-not-import';
 import requireSession from '@server/utils/requireSession';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { GetBucketLocationCommand, ListBucketsCommand, S3Client } from '@aws-sdk/client-s3';
-import s3 from '.';
 
 export class S3handler {
   private s3Repo: S3Repo;
@@ -14,13 +13,27 @@ export class S3handler {
     this.s3Repo = s3Repo;
   }
 
-  addS3Config: TRPCHandler<S3ConfigInput> = async ({ input, ctx }) => {
-    requireSession(ctx);
+  addConfig: TRPCHandler<S3ConfigInput> = async ({ input, ctx }) => {
     try {
+      requireSession(ctx);
       const { user } = ctx.session;
       const { roleArn, externalId, region } = input;
 
       const sts = new STSClient({ region });
+
+      const existingConfig = await this.s3Repo.verifyConfig({
+        roleArn,
+        externalId,
+        region,
+        userId: user.id,
+      });
+
+      if (existingConfig) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Configuration already exists for this role ARN and region',
+        });
+      }
 
       const assumed = await sts.send(
         new AssumeRoleCommand({
@@ -97,6 +110,35 @@ export class S3handler {
       throw new TRPCError({
         code: 'INTERNAL_SERVER_ERROR',
         message: 'Failed to store S3 configuration',
+      });
+    }
+  };
+
+  getBuckets: TRPCHandler = async ({ ctx }) => {
+    try {
+      requireSession(ctx);
+
+      const { user } = ctx.session;
+
+      const configs = await this.s3Repo.getConfigsByUserId(user.id);
+
+      if (configs.length === 0) {
+        return { configs: [] };
+      }
+
+      const data = await Promise.all(
+        configs.map(async (config) => ({
+          id: config.id,
+          region: config.region,
+          buckets: await this.s3Repo.getBucketsByConfigId(config.id),
+        }))
+      );
+
+      return { configs: data };
+    } catch (err) {
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Failed to retrieve S3 buckets',
       });
     }
   };

@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
-import { MAX } from 'uuid';
 dotenv.config();
 
 const transformString = (val: string | number | undefined) => {
@@ -21,17 +20,12 @@ const EnvSchema = z.object({
   PORT: z.union([z.string(), z.number()]).optional().transform(transformString).default(4000),
   REGISTRY_URL: z.string().url().optional().default('http://localhost:4100/api'),
   REDIS_URL: z.string().optional().default('redis://127.0.0.1:6379'),
-  POSTGRES_PRISMA_URL: z.string().optional().default(DB),
+  DATABASE_URL: z.string().optional().default(DB),
   CLIENT_URL: z.string().url().optional().default('http://localhost:5173'),
   JWT_ACCESS_SECRET: z.string().optional().default(JWT_ACCESS_SECRET),
   JWT_REFRESH_SECRET: z.string().optional().default(JWT_REFRESH_SECRET),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
-  NODEMAILER_EMAIL: z.string().email(),
-  NODEMAILER_PASSWORD: z.string(),
-  NODEMAILER_HOST: z.string(),
-  NODEMAILER_PORT: z.string(),
-  MAX_FILE_SIZE: z.union([z.string(), z.number()]).optional().transform(transformString),
   S3_ENC_KEY: z.string().length(64, 'S3_ENC_KEY must be 32 bytes (hex)'),
 });
 

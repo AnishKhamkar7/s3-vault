@@ -15,6 +15,7 @@
     "@trpc/server": "^11.8.1",
     "@types/body-parser": "^1.19.6",
     "@types/passport-google-oauth2": "^0.1.10",
+    "better-auth": "^1.4.10",
     "body-parser": "^2.2.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
